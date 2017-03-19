@@ -5,10 +5,10 @@ canPack :: (Num a, Ord a) => [a] -> [a] -> [a] -> Bool
 canPack _ [] _ = True
 canPack [] _ []  = False
 canPack (b:bs) (w:ws) skipb = ((b >= w) && canPack (b - w : (bs ++ skipb)) ws [])
-                             || not (null bs) && canPack bs (w:ws) (b:skipb)
+                              || not (null bs) && canPack bs (w:ws) (b:skipb)
 
-solveBpDecision :: Int -> [Rational] -> Bool
-solveBpDecision binNumber weights = canPack (replicate binNumber 1) weights []
+solveBpDecision :: [Rational] -> Int -> Bool
+solveBpDecision weights binNumber = canPack (replicate binNumber 1) weights []
 
 binarySearch :: Integral a => (a -> Bool) -> a -> a -> Maybe a
 binarySearch f left right
@@ -19,7 +19,7 @@ binarySearch f left right
     where mid       = (left + right - 1) `div` 2
 
 solveBpEvaluation :: [Rational] -> Maybe Int
-solveBpEvaluation weights = binarySearch (flip solveBpDecision weights) 0 (length weights)
+solveBpEvaluation weights = binarySearch (solveBpDecision weights) 0 (length weights)
 
 fillOneBin :: [Rational] -> [Rational] -> [Rational]
 fillOneBin bin [] = bin
