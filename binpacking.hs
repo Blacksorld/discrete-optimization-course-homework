@@ -2,45 +2,39 @@ import Data.List ((\\))
 
 
 canPack :: (Num a, Ord a) => [a] -> [a] -> [a] -> Bool
-canPack _ [] [] = True
-canPack [] _ _ = False
-canPack _ [] _ = False
-canPack (b:bs) (w:ws) bw = ((b >= w) && canPack (b - w : bs) ws bw)
-                           || canPack (b:bs) ws (w:bw)
-                           || canPack bs (bw ++ (w:ws)) []
+canPack _ [] _ = True
+canPack [] _ []  = False
+canPack (b:bs) (w:ws) skipb = ((b >= w) && canPack (b - w : (bs ++ skipb)) ws [])
+                             || not (null bs) && canPack bs (w:ws) (b:skipb)
 
-solveBpDecision :: (Num a, Ord a) => Int -> [a] -> Bool
+solveBpDecision :: Int -> [Rational] -> Bool
 solveBpDecision binNumber weights = canPack (replicate binNumber 1) weights []
 
-binarySearch :: (Ord a) => Int -> a -> [a] -> Maybe Int
-binarySearch _ _ [] = Nothing
-binarySearch shift n xs
-    | (length xs) == 1 = if (head xs) == n then Just shift else Nothing
-    | n == mid = binarySearch shift n leftmid
-    | n < mid = binarySearch shift n left 
-    | n > mid = binarySearch (shift + length leftmid) n right 
-    where mid = xs !! ((length xs - 1) `div` 2)
-          left = take ((length xs - 1) `div` 2) xs
-          leftmid = take ((length xs + 1) `div` 2) xs
-          right = drop ((length xs + 1) `div` 2) xs
+binarySearch :: Integral a => (a -> Bool) -> a -> a -> Maybe a
+binarySearch f left right
+    | left > right  = Nothing
+    | left == right = if f left == True then Just left else Nothing
+    | f mid == True    = binarySearch f left mid
+    | otherwise     = binarySearch f (mid + 1) right
+    where mid       = (left + right - 1) `div` 2
 
-solveBpEvaluation :: (Num a, Ord a) => [a] -> Maybe Int
-solveBpEvaluation weights = binarySearch 0 True $ map (flip solveBpDecision weights) [0,1..length weights]
+solveBpEvaluation :: [Rational] -> Maybe Int
+solveBpEvaluation weights = binarySearch (flip solveBpDecision weights) 0 (length weights)
 
-fillOneBin :: (Num a, Ord a) => [a] -> [a] -> [a]
+fillOneBin :: [Rational] -> [Rational] -> [Rational]
 fillOneBin bin [] = bin
 fillOneBin bin (w:ws)
-    | binNumber == Nothing = []
+    | binNumber == Nothing                                = []
     | (solveBpEvaluation ((sum bin + w):ws)) == binNumber = fillOneBin (w:bin) ws
-    | otherwise = fillOneBin bin ws
+    | otherwise                                           = fillOneBin bin ws
     where binNumber = solveBpEvaluation ((sum bin):(w:ws)) 
 
-fillAllBins :: (Num a, Ord a) => [[a]] -> [a] -> [[a]]
+fillAllBins :: [[Rational]] -> [Rational] -> [[Rational]]
 fillAllBins bins [] = bins
 fillAllBins bins weights 
         | bin == [] = []
         | otherwise = fillAllBins (bin:bins) (weights \\ bin)
         where bin = fillOneBin [] weights
 
-solveBpSearch :: (Num a, Ord a) => [a] -> [[a]]
+solveBpSearch :: [Rational] -> [[Rational]]
 solveBpSearch weights = fillAllBins [] weights
