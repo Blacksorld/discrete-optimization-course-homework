@@ -1,4 +1,4 @@
-import Data.List (elemIndex, (\\))
+import Data.List ((\\))
 
 
 canPack :: (Num a, Ord a) => [a] -> [a] -> [a] -> Bool
