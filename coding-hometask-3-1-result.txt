@@ -1,0 +1,10 @@
+pr107.tsp done in 3.333e-3 seconds with tour length 46678 using NN and in 2.3333e-2 seconds with tour length 53503 using NI
+pr152.tsp done in 3.333e-3 seconds with tour length 85703 using NN and in 5.6667e-2 seconds with tour length 86914 using NI
+pr439.tsp done in 1.0e-2 seconds with tour length 131282 using NN and in 1.026666 seconds with tour length 133268 using NI
+d198.tsp done in 3.334e-3 seconds with tour length 18620 using NN and in 5.3333e-2 seconds with tour length 18099 using NI
+d493.tsp done in 1.0e-2 seconds with tour length 43646 using NN and in 1.436666 seconds with tour length 41658 using NI
+d657.tsp done in 1.0e-2 seconds with tour length 62176 using NN and in 3.73 seconds with tour length 60195 using NI
+d2103.tsp done in 7.3334e-2 seconds with tour length 87469 using NN and in 139.383319 seconds with tour length 87359 using NI
+
+Вывод: на примерах pr*.tsp NN находит более оптимальное решение. На примерах d*.tsp NI находит более оптимальное решение.
+Длина цикла отличается не более, чем на ~15%, при это NI работает ощутимо дольше. Т.к. сложность NN — O(|V|²), а NI — O(|V|³).
