@@ -1,12 +1,14 @@
 import Data.List (minimumBy, delete, elemIndex)
-import Data.Maybe (fromJust, isJust, catMaybes)
+import Data.Maybe (fromJust, catMaybes)
 import Data.Char (isDigit)
-import System.CPUTime 
+import Control.DeepSeq (deepseq)
+import System.CPUTime (getCPUTime)
+import Data.Ord (comparing)
 
 type Point a = (a, a)
 
 euclidianDistance :: (Floating a) => Point a -> Point a -> a
-euclidianDistance (x1, y1) (x2, y2) = sqrt $ (x2 - x1)**2 + (y2 - y1)**2
+euclidianDistance (x1, y1) (x2, y2) = sqrt $ (x2 - x1)^2 + (y2 - y1)^2
 
 
 calculateTourLength :: (Floating a) => [Point a] -> a
@@ -18,8 +20,7 @@ calculateTourLength (x:y:xs) = calcylateCycleLength x (x:y:xs)
 
 
 nearestPoint :: (Floating a, Ord a) => Point a -> [Point a] -> Point a
-nearestPoint x xs = minimumBy (comparator) xs
-    where comparator y z = euclidianDistance x y `compare` euclidianDistance x z
+nearestPoint x xs = minimumBy (comparing (euclidianDistance x)) xs
 
 
 solveTspNearestNeighbour :: (Floating a, Ord a) => [Point a] -> [Point a]
@@ -34,11 +35,9 @@ solveTspNearestNeighbour (x:xs) = nearestNeighbour [x] xs
 nearestInsertion :: (Floating a, Ord a) => [(Point a, Point a)] -> [Point a] -> [Point a]
 nearestInsertion cycle [] = map fst cycle
 nearestInsertion cycle xs = nearestInsertion newCycle (delete nextPoint xs)
-    where nextPoint = snd $ minimumBy comparator [(x,y) | (x,_) <- cycle, y <- xs]
-              where comparator a b = euclidianDistance (fst a) (snd a) `compare` euclidianDistance (fst b) (snd b)
-          minEdge = minimumBy comparator cycle
+    where nextPoint = snd $ minimumBy (comparing (uncurry euclidianDistance)) [(x,y) | (x,_) <- cycle, y <- xs]
+          minEdge = minimumBy (comparing dist) cycle
               where dist x = euclidianDistance (fst x) nextPoint + euclidianDistance nextPoint (snd x) - euclidianDistance (fst x) (snd x)
-                    comparator x y = dist x `compare` dist y
           position = fromJust $ elemIndex minEdge cycle
           splittedCycle = splitAt position cycle 
           newCycle = left ++ [(fst mid, nextPoint), (nextPoint, snd mid)] ++ right
@@ -78,21 +77,21 @@ readTspFile file = do
         return $ readTspText text
 
 
-getWorkTime :: (Floating a, Ord a) => ([Point Double] -> [Point Double]) -> [Point Double] -> IO (Integer, Double)
+getWorkTime :: (Integral a) => ([Point Double] -> [Point Double]) -> [Point Double] -> IO (Double, a)
 getWorkTime getTour points = do
         startTime <- getCPUTime
         let tourLength = calculateTourLength $ getTour points
-        endTime <- getCPUTime
-        return (endTime - startTime, tourLength)
+        endTime <- tourLength `deepseq` getCPUTime
+        return (fromInteger (endTime - startTime) / 1e12 , round tourLength)
 
 
 runTspFile :: String -> IO ()
 runTspFile file = do
-        points <- readTspFile file
+        points <- readTspFile file 
         (nNTime, nNLength) <- getWorkTime solveTspNearestNeighbour points
         (nITime, nILength) <- getWorkTime solveTspNearestInsertion points
-        putStrLn (file ++ " done in " ++ (show nNTime) ++ " clocks with tour length " ++ (show nNLength) ++ " using NN and in "
-                 ++ (show nITime) ++ " clocks with tour length " ++ (show nILength) ++ " using NI")
+        putStrLn (file ++ " done in " ++ (show nNTime) ++ " seconds with tour length " ++ (show nNLength) ++ " using NN and in "
+                 ++ (show nITime) ++ " seconds with tour length " ++ (show nILength) ++ " using NI")
 
 runAll :: [String] -> IO ()
 runAll = sequence_ . map runTspFile 
