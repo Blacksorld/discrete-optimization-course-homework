@@ -1,0 +1,7 @@
+Instance pr107.tsp... done in 0.133333 seconds with lower bound 34760
+Instance pr152.tsp... done in 0.149999 seconds with lower bound 59168
+Instance pr439.tsp... done in 0.956667 seconds with lower bound 92214
+Instance d198.tsp... done in 0.19 seconds with lower bound 11810
+Instance d493.tsp... done in 1.236667 seconds with lower bound 29427
+Instance d657.tsp... done in 2.186666 seconds with lower bound 42682
+Instance d2103.tsp... done in 28.353331 seconds with lower bound 76359
