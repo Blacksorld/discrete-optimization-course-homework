@@ -47,7 +47,7 @@ unwrapZ (Z d) = d
 
 getWay :: [(Int, Int)] -> [Int]
 getWay edges = getWay' edges [] 1
-    where getWay' [_] way _ = reverse way
+    where getWay' [] way _ = reverse way
           getWay' edges way next = getWay' newEdges newWay newNext 
               where [edge] = filter (\(x, y) -> x == next) edges
                     newEdges = delete edge edges
